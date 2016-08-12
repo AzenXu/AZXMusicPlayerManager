@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5377C761D5DBF3300B3C9F6 /* RequestTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */; };
 		B5477A341D5AF5380099B2E6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A331D5AF5380099B2E6 /* AppDelegate.swift */; };
 		B5477A361D5AF5380099B2E6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A351D5AF5380099B2E6 /* ViewController.swift */; };
 		B5477A391D5AF5380099B2E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5477A371D5AF5380099B2E6 /* Main.storyboard */; };
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		B5377C721D5D7EF700B3C9F6 /* testForAVPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = testForAVPlayer.entitlements; sourceTree = "<group>"; };
+		B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTask.swift; sourceTree = "<group>"; };
 		B5477A301D5AF5380099B2E6 /* testForAVPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testForAVPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5477A331D5AF5380099B2E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5477A351D5AF5380099B2E6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 				B5477A331D5AF5380099B2E6 /* AppDelegate.swift */,
 				B5477A351D5AF5380099B2E6 /* ViewController.swift */,
 				B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */,
+				B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */,
 				B5477A371D5AF5380099B2E6 /* Main.storyboard */,
 				B5477A3A1D5AF5380099B2E6 /* Assets.xcassets */,
 				B5477A3C1D5AF5380099B2E6 /* LaunchScreen.storyboard */,
@@ -270,6 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5377C761D5DBF3300B3C9F6 /* RequestTask.swift in Sources */,
 				B5477A361D5AF5380099B2E6 /* ViewController.swift in Sources */,
 				B5477A661D5B137B0099B2E6 /* MusicPlayerManager.swift in Sources */,
 				B5477A341D5AF5380099B2E6 /* AppDelegate.swift in Sources */,
