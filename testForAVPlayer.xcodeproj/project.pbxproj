@@ -16,6 +16,7 @@
 		B5477A491D5AF5380099B2E6 /* testForAVPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A481D5AF5380099B2E6 /* testForAVPlayerTests.swift */; };
 		B5477A541D5AF5380099B2E6 /* testForAVPlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A531D5AF5380099B2E6 /* testForAVPlayerUITests.swift */; };
 		B5477A661D5B137B0099B2E6 /* MusicPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */; };
+		B55095AA1D5ECF3C00290EB4 /* RequestLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		B5477A531D5AF5380099B2E6 /* testForAVPlayerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testForAVPlayerUITests.swift; sourceTree = "<group>"; };
 		B5477A551D5AF5380099B2E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicPlayerManager.swift; sourceTree = "<group>"; };
+		B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 				B5477A351D5AF5380099B2E6 /* ViewController.swift */,
 				B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */,
 				B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */,
+				B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */,
 				B5477A371D5AF5380099B2E6 /* Main.storyboard */,
 				B5477A3A1D5AF5380099B2E6 /* Assets.xcassets */,
 				B5477A3C1D5AF5380099B2E6 /* LaunchScreen.storyboard */,
@@ -274,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5377C761D5DBF3300B3C9F6 /* RequestTask.swift in Sources */,
+				B55095AA1D5ECF3C00290EB4 /* RequestLoader.swift in Sources */,
 				B5477A361D5AF5380099B2E6 /* ViewController.swift in Sources */,
 				B5477A661D5B137B0099B2E6 /* MusicPlayerManager.swift in Sources */,
 				B5477A341D5AF5380099B2E6 /* AppDelegate.swift in Sources */,

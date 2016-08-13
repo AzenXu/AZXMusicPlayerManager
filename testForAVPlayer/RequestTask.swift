@@ -4,7 +4,7 @@
 //
 //  Created by XuAzen on 16/8/12.
 //  Copyright © 2016年 ymh. All rights reserved.
-//
+//  做下载、持久化的
 
 import Foundation
 
@@ -82,6 +82,7 @@ extension RequestTask {
     }
 }
 
+// MARK: - NSURLConnectionDataDelegate
 extension RequestTask: NSURLConnectionDataDelegate {
     public func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         isFinishLoad = false
@@ -140,11 +141,33 @@ extension RequestTask: NSURLConnectionDataDelegate {
     
     public func connection(connection: NSURLConnection, didFailWithError error: NSError) {
         if error.code == -1001 && !once {   //  超时，1秒后重连一次
-//            dispatch_after(<#T##when: dispatch_time_t##dispatch_time_t#>, <#T##queue: dispatch_queue_t##dispatch_queue_t#>, <#T##block: dispatch_block_t##dispatch_block_t##() -> Void#>)
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), { 
+                self.continueLoading()
+            })
         }
         if error.code == -1009 {
             print("无网络连接")
         }
         receiveVideoFailHandler?(task: self,error: error)
+    }
+}
+
+// MARK: - private functions
+extension RequestTask {
+    /**
+     断线重连
+     */
+    private func continueLoading() {
+        once = true
+        guard let url = url else {return}
+        let actualURLComponents = NSURLComponents.init(URL: url, resolvingAgainstBaseURL: false)
+        actualURLComponents?.scheme = "http"
+        guard let URL = actualURLComponents?.URL else {return}
+        let request = NSMutableURLRequest(URL: URL, cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringCacheData, timeoutInterval: 20.0)
+        request.addValue("bytes=\(downLoadingOffset)-\(videoLength - 1)", forHTTPHeaderField: "Range")
+        connection?.cancel()
+        connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
+        connection?.setDelegateQueue(NSOperationQueue.mainQueue())
+        connection?.start()
     }
 }
