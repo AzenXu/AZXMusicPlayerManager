@@ -13,7 +13,7 @@ public class RequestTask: NSObject {
     var tempPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "temp.mp4"     //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
     
     public var url: NSURL?
-    public var offset: Int?                 //  请求位置（从哪开始）
+    public var offset: Int = 0                 //  请求位置（从哪开始）
     public var taskArr = [NSURLConnection]()   //  NSURLConnection的数组
     public var downLoadingOffset: Int = 0   //  已下载数据长度
     public var videoLength: Int = 0         //  视频总长度
