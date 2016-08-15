@@ -10,7 +10,7 @@ import Foundation
 import AVFoundation
 import MobileCoreServices
 
-public class RequestLoader: NSURLConnection {    //  为啥要继承自NSURLConnection呢？
+public class RequestLoader: NSObject {
     
     //  publics
     public var task: RequestTask?   //  下载任务
@@ -22,7 +22,6 @@ public class RequestLoader: NSURLConnection {    //  为啥要继承自NSURLConn
     
     override init() {
         super.init()
-        
         let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! as NSString
         videoPath = document.stringByAppendingPathComponent("temp.mp4")
         
