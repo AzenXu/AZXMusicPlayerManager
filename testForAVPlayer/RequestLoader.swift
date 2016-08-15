@@ -161,3 +161,18 @@ extension RequestLoader {
         }
     }
 }
+
+extension RequestLoader {
+    /**
+     获取相应协议头的URL
+     
+     - parameter scheme: 协议头（默认为streaming）
+     - parameter url:    待转换URL
+     */
+    public func getURL(forScheme scheme: String = "streaming", url: NSURL?) -> NSURL? {
+        guard let url = url else {return nil}
+        let component = NSURLComponents(URL: url, resolvingAgainstBaseURL: false)
+        component?.scheme = scheme
+        return component?.URL
+    }
+}
