@@ -159,7 +159,7 @@ extension RequestTask: NSURLConnectionDataDelegate {
     
     public func connection(connection: NSURLConnection, didFailWithError error: NSError) {
         if error.code == -1001 && !once {   //  超时，1秒后重连一次
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), { 
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * Int64(NSEC_PER_SEC)), dispatch_get_main_queue(), {
                 self.continueLoading()
             })
         }
