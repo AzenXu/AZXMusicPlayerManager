@@ -61,6 +61,7 @@ public class MusicPlayerManager: NSObject {
     }()
     
     private var playerStatusObserver: NSObject?
+    private var resourceLoader: RequestLoader = RequestLoader()
     
     public class var sharedInstance: MusicPlayerManager {
         struct Singleton {
@@ -183,8 +184,10 @@ extension MusicPlayerManager {
     }
     
     private func getPlayerItem(withURL musicURL: NSURL) -> AVPlayerItem {
+//        let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
+//        let asset = AVURLAsset(URL: playURL)
         let asset = AVURLAsset(URL: musicURL)
-        asset.resourceLoader.setDelegate(self, queue: dispatch_get_main_queue())
+//        asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
         let item = AVPlayerItem(asset: asset)
         return item
     }
@@ -256,8 +259,4 @@ extension MusicPlayerManager {
         }
         currentItem.removeObserver(self, forKeyPath: "loadedTimeRanges")
     }
-}
-
-extension MusicPlayerManager: AVAssetResourceLoaderDelegate {
-    
 }
