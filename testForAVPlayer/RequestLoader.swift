@@ -65,7 +65,7 @@ extension RequestLoader: AVAssetResourceLoaderDelegate {
 extension RequestLoader {
     private func _dealWithLoadingRequest(loadingRequest: AVAssetResourceLoadingRequest) {
         guard let interceptedURL = loadingRequest.request.URL else {return}
-        let range = NSMakeRange(Int(loadingRequest.dataRequest?.currentOffset ?? 0),Int(CGFloat.max))
+        let range = NSMakeRange(Int(loadingRequest.dataRequest?.currentOffset ?? 0),Int.max)
         if let task = task {
             if task.downLoadingOffset > 0 { //  如果该请求正在加载...
                 _processPendingRequests()
@@ -141,7 +141,8 @@ extension RequestLoader {
             return false
         } else {
             //  取出来缓存文件
-            let fileData = try! NSData(contentsOfURL: NSURL(string: (videoPath ?? "") as String)!, options: NSDataReadingOptions.DataReadingMappedIfSafe)
+            var fileData: NSData? = nil
+            fileData = NSData(contentsOfFile: videoPath as! String)
             //  可以拿到的从startOffset之后的长度
             let unreadBytes = task.downLoadingOffset - (Int(startOffset) - task.offset)
             //  应该能拿到的字节数
@@ -149,7 +150,7 @@ extension RequestLoader {
             //  应该从本地拿的数据范围
             let fetchRange = NSMakeRange(Int(startOffset) - task.offset, numberOfBytesToRespondWith)
             //  拿到响应数据
-            let responseData = fileData.subdataWithRange(fetchRange)
+            guard let responseData = fileData?.subdataWithRange(fetchRange) else {return false}
             //  响应请求
             dataRequest.respondWithData(responseData)
             //  请求结束位置

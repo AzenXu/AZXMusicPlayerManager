@@ -183,11 +183,20 @@ extension MusicPlayerManager {
         observePlayingItem()
     }
     
+    private func getLocationFilePath(url: NSURL) -> String? {
+        let fileName = url.lastPathComponent
+        //  从dir中找这个name的file
+        //  找不到返回nil
+        print(fileName)
+        return nil
+    }
+    
     private func getPlayerItem(withURL musicURL: NSURL) -> AVPlayerItem {
-//        let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
-//        let asset = AVURLAsset(URL: playURL)
-        let asset = AVURLAsset(URL: musicURL)
-//        asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
+        let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
+//        let playURL = resourceLoader.getSchemeVideoURL(musicURL)
+        let asset = AVURLAsset(URL: playURL)
+//        let asset = AVURLAsset(URL: musicURL)
+        asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
         let item = AVPlayerItem(asset: asset)
         return item
     }

@@ -10,7 +10,7 @@ import Foundation
 
 public class RequestTask: NSObject {
     
-    var tempPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "temp.mp4"     //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
+    var tempPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "/temp.mp4"     //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
     
     public var url: NSURL?
     public var offset: Int = 0                 //  请求位置（从哪开始）
@@ -61,7 +61,7 @@ extension RequestTask {
             initialTmpFile()
         }
         
-        //  初始化以下载文件长度
+        //  初始化已下载文件长度
         downLoadingOffset = 0
         
         //  把stream://xxx的头换成http://的头
@@ -110,6 +110,7 @@ extension RequestTask: NSURLConnectionDataDelegate {
         taskArr.append(connection)
         //  初始化文件传输句柄
         fileHandle = NSFileHandle.init(forWritingAtPath: tempPath)
+        print(tempPath)
     }
     
     public func connection(connection: NSURLConnection, didReceiveData data: NSData) {
