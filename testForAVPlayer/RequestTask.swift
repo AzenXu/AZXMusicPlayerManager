@@ -32,10 +32,21 @@ public class RequestTask: NSObject {
     
     override init() {
         super.init()
+        _initialTmpFile()
+    }
+    
+    private func _initialTmpFile() {
         if NSFileManager.defaultManager().fileExistsAtPath(tempPath) {
             try! NSFileManager.defaultManager().removeItemAtPath(tempPath)
         }
         NSFileManager.defaultManager().createFileAtPath(tempPath, contents: nil, attributes: nil)
+    }
+    
+    private func _updateFilePath(url: NSURL) {
+        let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last!
+        let name = "temp.mp4"//url.lastPathComponent ?? "tmp.mp4"
+        tempPath = document + "/\(name)"
+        _initialTmpFile()
     }
 }
 
@@ -52,7 +63,7 @@ extension RequestTask {
             try! NSFileManager.defaultManager().removeItemAtPath(tempPath)
             NSFileManager.defaultManager().createFileAtPath(tempPath, contents: nil, attributes: nil)
         }
-        
+        _updateFilePath(url)
         self.url = url
         self.offset = offset
         
@@ -122,12 +133,13 @@ extension RequestTask: NSURLConnectionDataDelegate {
     }
     
     public func connectionDidFinishLoading(connection: NSURLConnection) {
-        if taskArr.count < 2 {
+        func tmpPersistence() {
             isFinishLoad = true
             let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! as NSString
-            //TODO: 更新保存路径
-            let movePath = document.stringByAppendingPathComponent("保存数据.mp4")
-            //TODO: 认为这里应该用move方法，否则应该copy完以后清除tempFile..
+            let fileName = url?.lastPathComponent
+            let movePath = document.stringByAppendingPathComponent(fileName ?? "undefine.mp4")
+            _ = try? NSFileManager.defaultManager().removeItemAtPath(movePath)
+            
             var isSuccessful = true
             do { try NSFileManager.defaultManager().copyItemAtPath(tempPath, toPath: movePath) } catch {
                 isSuccessful = false
@@ -137,6 +149,11 @@ extension RequestTask: NSURLConnectionDataDelegate {
                 print("持久化文件成功！路径 - \(movePath)")
             }
         }
+        
+        if taskArr.count < 2 {
+            tmpPersistence()
+        }
+        
         receiveVideoFinishHanlder?(task: self)
     }
     

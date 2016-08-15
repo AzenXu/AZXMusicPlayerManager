@@ -182,23 +182,33 @@ extension MusicPlayerManager {
         player.replaceCurrentItemWithPlayerItem(getPlayerItem(withURL: currentURL))
         observePlayingItem()
     }
-    
-    private func getLocationFilePath(url: NSURL) -> String? {
+    /**
+     本地不存在，返回nil，否则返回本地URL
+     */
+    private func getLocationFilePath(url: NSURL) -> NSURL? {
         let fileName = url.lastPathComponent
-        //  从dir中找这个name的file
-        //  找不到返回nil
-        print(fileName)
-        return nil
+        let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last!
+        let path = document + "/\(fileName ?? "tmp.mp4")"
+        if NSFileManager.defaultManager().fileExistsAtPath(path) {
+            let url = NSURL.init(fileURLWithPath: path)
+            return url
+        } else {
+            return nil
+        }
     }
     
     private func getPlayerItem(withURL musicURL: NSURL) -> AVPlayerItem {
-        let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
-//        let playURL = resourceLoader.getSchemeVideoURL(musicURL)
-        let asset = AVURLAsset(URL: playURL)
-//        let asset = AVURLAsset(URL: musicURL)
-        asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
-        let item = AVPlayerItem(asset: asset)
-        return item
+        
+        if let locationFile = getLocationFilePath(musicURL) {
+            let item = AVPlayerItem(URL: locationFile)
+            return item
+        } else {
+            let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
+            let asset = AVURLAsset(URL: playURL)
+            asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
+            let item = AVPlayerItem(asset: asset)
+            return item
+        }
     }
     
     private func setupPlayer(withURL musicURL: NSURL) {
