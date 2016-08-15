@@ -205,7 +205,7 @@ extension MusicPlayerManager {
         } else {
             let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
             let asset = AVURLAsset(URL: playURL)
-            asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_main_queue())
+            asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
             let item = AVPlayerItem(asset: asset)
             return item
         }
@@ -258,7 +258,7 @@ extension MusicPlayerManager {
         //  KVO监听正在播放的对象状态变化
         currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.New, context: nil)
         //  监听player播放情况
-        playerStatusObserver = player.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_main_queue(), usingBlock: { (time) in
+        playerStatusObserver = player.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { (time) in
             //  获取当前播放时间
             let currentTime = CMTimeGetSeconds(time)
             let totalTime = CMTimeGetSeconds(currentItem.duration)
