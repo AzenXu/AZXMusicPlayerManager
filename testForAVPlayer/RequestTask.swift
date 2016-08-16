@@ -96,6 +96,7 @@ extension RequestTask {
 // MARK: - NSURLConnectionDataDelegate
 extension RequestTask: NSURLConnectionDataDelegate {
     public func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
+        //TODO: 这里是不是还要根据range做排序呀...
         isFinishLoad = false
         guard response is NSHTTPURLResponse else {return}
         //  解析头部数据
@@ -125,11 +126,14 @@ extension RequestTask: NSURLConnectionDataDelegate {
     }
     
     public func connection(connection: NSURLConnection, didReceiveData data: NSData) {
-        //  寻址到文件末尾
-        fileHandle?.seekToEndOfFile()
-        fileHandle?.writeData(data)
-        downLoadingOffset += data.length
-        receiveVideoDataHandler?(task: self)
+        let queue = dispatch_queue_create("com.azen.taskConnect", DISPATCH_QUEUE_SERIAL)
+        dispatch_async(queue) {
+            //  寻址到文件末尾
+            self.fileHandle?.seekToEndOfFile()
+            self.fileHandle?.writeData(data)
+            self.downLoadingOffset += data.length
+            self.receiveVideoDataHandler?(task: self)
+        }
     }
     
     public func connectionDidFinishLoading(connection: NSURLConnection) {
