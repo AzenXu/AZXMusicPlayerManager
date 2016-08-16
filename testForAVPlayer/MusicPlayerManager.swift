@@ -187,8 +187,7 @@ extension MusicPlayerManager {
      */
     private func getLocationFilePath(url: NSURL) -> NSURL? {
         let fileName = url.lastPathComponent
-        let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last!
-        let path = document + "/\(fileName ?? "tmp.mp4")"
+        let path = StreamAudioConfig.audioDicPath + "/\(fileName ?? "tmp.mp4")"
         if NSFileManager.defaultManager().fileExistsAtPath(path) {
             let url = NSURL.init(fileURLWithPath: path)
             return url
@@ -284,4 +283,10 @@ extension MusicPlayerManager {
         }
         currentItem.removeObserver(self, forKeyPath: "loadedTimeRanges")
     }
+}
+
+public struct StreamAudioConfig {
+    static let audioDicPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "/streamAudio"  //  缓冲文件夹
+    static let tempPath: String = audioDicPath + "/temp.mp4"    //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
+    
 }

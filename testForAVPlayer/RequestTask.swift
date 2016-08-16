@@ -10,8 +10,6 @@ import Foundation
 
 public class RequestTask: NSObject {
     
-    var tempPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "/temp.mp4"     //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
-    
     public var url: NSURL?
     public var offset: Int = 0                 //  请求位置（从哪开始）
     public var taskArr = [NSURLConnection]()   //  NSURLConnection的数组
@@ -36,17 +34,16 @@ public class RequestTask: NSObject {
     }
     
     private func _initialTmpFile() {
-        if NSFileManager.defaultManager().fileExistsAtPath(tempPath) {
-            try! NSFileManager.defaultManager().removeItemAtPath(tempPath)
+        do { try NSFileManager.defaultManager().createDirectoryAtPath(StreamAudioConfig.audioDicPath, withIntermediateDirectories: true, attributes: nil) } catch { print("creat dic false -- error:\(error)") }
+        if NSFileManager.defaultManager().fileExistsAtPath(StreamAudioConfig.tempPath) {
+            try! NSFileManager.defaultManager().removeItemAtPath(StreamAudioConfig.tempPath)
         }
-        NSFileManager.defaultManager().createFileAtPath(tempPath, contents: nil, attributes: nil)
+        NSFileManager.defaultManager().createFileAtPath(StreamAudioConfig.tempPath, contents: nil, attributes: nil)
     }
     
     private func _updateFilePath(url: NSURL) {
-        let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last!
-        let name = "temp.mp4"//url.lastPathComponent ?? "tmp.mp4"
-        tempPath = document + "/\(name)"
         _initialTmpFile()
+        print("缓存文件夹路径 -- \(StreamAudioConfig.audioDicPath)")
     }
 }
 
@@ -60,8 +57,8 @@ extension RequestTask {
     public func set(URL url: NSURL, offset: Int) {
         
         func initialTmpFile() {
-            try! NSFileManager.defaultManager().removeItemAtPath(tempPath)
-            NSFileManager.defaultManager().createFileAtPath(tempPath, contents: nil, attributes: nil)
+            try! NSFileManager.defaultManager().removeItemAtPath(StreamAudioConfig.tempPath)
+            NSFileManager.defaultManager().createFileAtPath(StreamAudioConfig.tempPath, contents: nil, attributes: nil)
         }
         _updateFilePath(url)
         self.url = url
@@ -121,8 +118,7 @@ extension RequestTask: NSURLConnectionDataDelegate {
         //  连接加入到任务数组中
         taskArr.append(connection)
         //  初始化文件传输句柄
-        fileHandle = NSFileHandle.init(forWritingAtPath: tempPath)
-        print(tempPath)
+        fileHandle = NSFileHandle.init(forWritingAtPath: StreamAudioConfig.tempPath)
     }
     
     public func connection(connection: NSURLConnection, didReceiveData data: NSData) {
@@ -151,13 +147,13 @@ extension RequestTask: NSURLConnectionDataDelegate {
     public func connectionDidFinishLoading(connection: NSURLConnection) {
         func tmpPersistence() {
             isFinishLoad = true
-            let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! as NSString
             let fileName = url?.lastPathComponent
-            let movePath = document.stringByAppendingPathComponent(fileName ?? "undefine.mp4")
+//            let movePath = audioDicPath.stringByAppendingPathComponent(fileName ?? "undefine.mp4")
+            let movePath = StreamAudioConfig.audioDicPath + "/\(fileName ?? "undefine.mp4")"
             _ = try? NSFileManager.defaultManager().removeItemAtPath(movePath)
             
             var isSuccessful = true
-            do { try NSFileManager.defaultManager().copyItemAtPath(tempPath, toPath: movePath) } catch {
+            do { try NSFileManager.defaultManager().copyItemAtPath(StreamAudioConfig.tempPath, toPath: movePath) } catch {
                 isSuccessful = false
                 print("tmp文件持久化失败")
             }
@@ -214,6 +210,6 @@ extension RequestTask {
         //  2. 关闭文件写入句柄
         fileHandle?.closeFile()
         //  3. 移除缓存
-        _ = try? NSFileManager.defaultManager().removeItemAtPath(tempPath)
+        _ = try? NSFileManager.defaultManager().removeItemAtPath(StreamAudioConfig.tempPath)
     }
 }

@@ -18,15 +18,6 @@ public class RequestLoader: NSObject {
     
     //  privates
     private var pendingRequset = [AVAssetResourceLoadingRequest]()   //  存播放器请求的数据的
-    private var videoPath: NSString?                //  缓存路径
-    
-    override init() {
-        super.init()
-        let document = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! as NSString
-        videoPath = document.stringByAppendingPathComponent("temp.mp4")
-        
-        print("缓存路径为 - \(videoPath)")
-    }
 }
 
 extension RequestLoader: AVAssetResourceLoaderDelegate {
@@ -141,7 +132,7 @@ extension RequestLoader {
         } else {
             //  取出来缓存文件
             var fileData: NSData? = nil
-            fileData = NSData(contentsOfFile: videoPath as! String)
+            fileData = NSData(contentsOfFile: StreamAudioConfig.tempPath)
             //  可以拿到的从startOffset之后的长度
             let unreadBytes = task.downLoadingOffset - (Int(startOffset) - task.offset)
             //  应该能拿到的字节数
