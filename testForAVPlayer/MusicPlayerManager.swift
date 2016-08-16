@@ -56,12 +56,11 @@ public class MusicPlayerManager: NSObject {
     private var musicURLList: [NSURL]?
     
     //  basic element
-    lazy public var player: AVPlayer = {
-        return AVPlayer()
-    }()
+    public var player: AVPlayer?
     
     private var playerStatusObserver: NSObject?
     private var resourceLoader: RequestLoader = RequestLoader()
+    private var currentAsset: AVURLAsset?
     
     public class var sharedInstance: MusicPlayerManager {
         struct Singleton {
@@ -108,13 +107,13 @@ extension MusicPlayerManager {
      继续
      */
     public func goOn() {
-        player.rate = 1
+        player?.rate = 1
     }
     /**
      暂停 - 可继续
      */
     public func pause() {
-        player.rate = 0
+        player?.rate = 0
     }
     /**
      停止 - 无法继续
@@ -179,7 +178,7 @@ extension MusicPlayerManager {
         guard let currentURL = currentURL else {return}
         //  结束上一首
         endPlay()
-        player.replaceCurrentItemWithPlayerItem(getPlayerItem(withURL: currentURL))
+        player = AVPlayer(playerItem: getPlayerItem(withURL: currentURL))
         observePlayingItem()
     }
     /**
@@ -205,6 +204,7 @@ extension MusicPlayerManager {
         } else {
             let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
             let asset = AVURLAsset(URL: playURL)
+            currentAsset = asset
             asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
             let item = AVPlayerItem(asset: asset)
             return item
@@ -217,17 +217,22 @@ extension MusicPlayerManager {
     }
     
     private func playerPlay() {
-        player.play()
+        player?.play()
     }
     
     private func endPlay() {
         status = ManagerStatus.Stop
-        player.rate = 0
+        player?.rate = 0
         removeObserForPlayingItem()
-        player.replaceCurrentItemWithPlayerItem(nil)
+        player?.replaceCurrentItemWithPlayerItem(nil)
+        resourceLoader.cancel()
+        currentAsset?.resourceLoader.setDelegate(nil, queue: nil)
+        
+        resourceLoader = RequestLoader()
         playDuration = 0
         playTime = 0
         playEndConsul?()
+        player = nil
     }
 }
 
@@ -254,11 +259,11 @@ extension MusicPlayerManager {
     }
     
     private func observePlayingItem() {
-        guard let currentItem = self.player.currentItem else {return}
+        guard let currentItem = self.player?.currentItem else {return}
         //  KVO监听正在播放的对象状态变化
         currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.New, context: nil)
         //  监听player播放情况
-        playerStatusObserver = player.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { (time) in
+        playerStatusObserver = player?.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { (time) in
             //  获取当前播放时间
             let currentTime = CMTimeGetSeconds(time)
             let totalTime = CMTimeGetSeconds(currentItem.duration)
@@ -270,10 +275,10 @@ extension MusicPlayerManager {
     }
     
     private func removeObserForPlayingItem() {
-        guard let currentItem = self.player.currentItem else {return}
+        guard let currentItem = self.player?.currentItem else {return}
         currentItem.removeObserver(self, forKeyPath: "status")
         if playerStatusObserver != nil {
-            player.removeTimeObserver(playerStatusObserver!)
+            player?.removeTimeObserver(playerStatusObserver!)
             playerStatusObserver = nil
         }
         currentItem.removeObserver(self, forKeyPath: "loadedTimeRanges")

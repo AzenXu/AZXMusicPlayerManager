@@ -175,4 +175,14 @@ extension RequestLoader {
         component?.scheme = scheme
         return component?.URL
     }
+    
+    public func cancel() {
+        //  1. 结束task下载任务
+        task?.cancel()
+        task = nil
+        //  2. 停止数据请求
+        for request in pendingRequset {
+            request.finishLoading()
+        }
+    }
 }

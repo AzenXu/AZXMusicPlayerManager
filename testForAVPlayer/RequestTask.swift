@@ -126,13 +126,25 @@ extension RequestTask: NSURLConnectionDataDelegate {
     }
     
     public func connection(connection: NSURLConnection, didReceiveData data: NSData) {
+        
+        //  寻址到文件末尾
+        self.fileHandle?.seekToEndOfFile()
+        self.fileHandle?.writeData(data)
+        self.downLoadingOffset += data.length
+        self.receiveVideoDataHandler?(task: self)
+        
+//        print("线程 - \(NSThread.currentThread())")
+        
+        //  这里用子线程有问题...
         let queue = dispatch_queue_create("com.azen.taskConnect", DISPATCH_QUEUE_SERIAL)
         dispatch_async(queue) {
-            //  寻址到文件末尾
-            self.fileHandle?.seekToEndOfFile()
-            self.fileHandle?.writeData(data)
-            self.downLoadingOffset += data.length
-            self.receiveVideoDataHandler?(task: self)
+//            //  寻址到文件末尾
+//            self.fileHandle?.seekToEndOfFile()
+//            self.fileHandle?.writeData(data)
+//            self.downLoadingOffset += data.length
+//            self.receiveVideoDataHandler?(task: self)
+//            let thread = NSThread.currentThread()
+//            print("线程 - \(thread)")
         }
     }
     
@@ -191,5 +203,17 @@ extension RequestTask {
         connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
         connection?.setDelegateQueue(NSOperationQueue.mainQueue())
         connection?.start()
+    }
+}
+
+extension RequestTask {
+    
+    public func cancel() {
+        //  1. 断开连接
+        connection?.cancel()
+        //  2. 关闭文件写入句柄
+        fileHandle?.closeFile()
+        //  3. 移除缓存
+        _ = try? NSFileManager.defaultManager().removeItemAtPath(tempPath)
     }
 }
