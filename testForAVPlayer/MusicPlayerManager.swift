@@ -5,6 +5,7 @@
 //  Created by XuAzen on 16/8/10.
 //  Copyright © 2016年 ymh. All rights reserved.
 //
+//  TODO: 断点下载、线程优化、支持视频流播放
 
 import AVFoundation
 
