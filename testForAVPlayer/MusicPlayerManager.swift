@@ -8,11 +8,13 @@
 //  TODO: 断点下载、线程优化、支持视频流播放
 
 import AVFoundation
+import Foundation
+import UIKit
 
 public class MusicPlayerManager: NSObject {
     
     
-//  public var status
+    //  public var status
     
     public var currentURL: NSURL? {
         get {
@@ -21,10 +23,10 @@ public class MusicPlayerManager: NSObject {
         }
     }
     
-    /*播放状态**/
+    /**播放状态，用于需要获取播放器状态的地方KVO*/
     public var status: ManagerStatus = .Non
-    /*播放进度**/
-    public var progress: Float {
+    /**播放进度*/
+    public var progress: CGFloat {
         get {
             if playDuration > 0 {
                 let progress = playTime / playDuration
@@ -34,14 +36,18 @@ public class MusicPlayerManager: NSObject {
             }
         }
     }
-    /*已播放时长**/
-    public var playTime: Float = 0
-    /*总时长**/
-    public var playDuration: Float = 0
+    /**已播放时长*/
+    public var playTime: CGFloat = 0
+    /**总时长*/
+    public var playDuration: CGFloat = CGFloat.max
+    /**缓冲时长*/
+    public var tmpTime: CGFloat = 0
     
     public var playEndConsul: (()->())?
+    /**强引用控制器，防止被销毁*/
+    public var currentController: UIViewController?
     
-//  private status
+    //  private status
     private var currentIndex: Int?
     private var currentItem: AVPlayerItem? {
         get {
@@ -62,6 +68,7 @@ public class MusicPlayerManager: NSObject {
     private var playerStatusObserver: NSObject?
     private var resourceLoader: RequestLoader = RequestLoader()
     private var currentAsset: AVURLAsset?
+    private var progressCallBack: ((tmpProgress: Float?, playProgress: Float?)->())?
     
     public class var sharedInstance: MusicPlayerManager {
         struct Singleton {
@@ -95,6 +102,11 @@ extension MusicPlayerManager {
         playMusicWithCurrentIndex()
     }
     
+    public func play(musicURL: NSURL?, callBack: ((tmpProgress: Float?, playProgress: Float?)->())?) {
+        play(musicURL)
+        progressCallBack = callBack
+    }
+    
     public func next() {
         currentIndex = getNextIndex()
         playMusicWithCurrentIndex()
@@ -126,7 +138,7 @@ extension MusicPlayerManager {
 
 // MARK: - private funcs
 extension MusicPlayerManager {
-
+    
     private func putMusicToArray(music URL: NSURL) {
         if musicURLList == nil {
             musicURLList = [URL]
@@ -228,6 +240,7 @@ extension MusicPlayerManager {
         resourceLoader.cancel()
         currentAsset?.resourceLoader.setDelegate(nil, queue: nil)
         
+        progressCallBack = nil
         resourceLoader = RequestLoader()
         playDuration = 0
         playTime = 0
@@ -242,11 +255,13 @@ extension MusicPlayerManager {
         let item = object as! AVPlayerItem
         if keyPath == "status" {
             if item.status == AVPlayerItemStatus.ReadyToPlay {
+                status = .ReadyToPlay
                 print("ReadyToPlay")
                 let duration = item.duration
                 playerPlay()
                 print(duration)
             } else if item.status == AVPlayerItemStatus.Failed {
+                status = .Stop
                 print("Failed")
                 stop()
             }
@@ -254,7 +269,10 @@ extension MusicPlayerManager {
             let array = item.loadedTimeRanges
             guard let timeRange = array.first?.CMTimeRangeValue else {return}  //  缓冲时间范围
             let totalBuffer = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)    //  当前缓冲长度
+            tmpTime = CGFloat(tmpTime)
             print("共缓冲 - \(totalBuffer)")
+            let tmpProgress = tmpTime / playDuration
+            progressCallBack?(tmpProgress: Float(tmpProgress), playProgress: nil)
         }
     }
     
@@ -263,13 +281,20 @@ extension MusicPlayerManager {
         //  KVO监听正在播放的对象状态变化
         currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.New, context: nil)
         //  监听player播放情况
-        playerStatusObserver = player?.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { (time) in
+        playerStatusObserver = player?.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { [weak self] (time) in
+            guard let `self` = self else {return}
             //  获取当前播放时间
+            self.status = .Play
             let currentTime = CMTimeGetSeconds(time)
             let totalTime = CMTimeGetSeconds(currentItem.duration)
+            self.playDuration = CGFloat(totalTime)
+            self.playTime = CGFloat(currentTime)
             print("current time ---- \(currentTime) ---- tutalTime ---- \(totalTime)")
-            
-        }) as? NSObject
+            self.progressCallBack?(tmpProgress: nil, playProgress: Float(self.progress))
+            if totalTime - currentTime < 0.1 {
+                self.endPlay()
+            }
+            }) as? NSObject
         //  监听缓存情况
         currentItem.addObserver(self, forKeyPath: "loadedTimeRanges", options: NSKeyValueObservingOptions.New, context: nil)
     }
