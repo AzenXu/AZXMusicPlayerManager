@@ -16,8 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-//        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
-//        becomeFirstResponder()
+        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
+        becomeFirstResponder()
         return true
     }
 
@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        BackgroundTask.fire()
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
@@ -43,40 +44,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
-//    override func canBecomeFirstResponder() -> Bool {
-//        return true
-//    }
-//    
-//    override func remoteControlReceivedWithEvent(event: UIEvent?) {
-//        guard let event = event else {return}
-//        switch event.subtype {
-//        case .None:
-//            <#statement#>
-//        case .MotionShake:
-//            <#statement#>
-//        case .RemoteControlPlay:
-//            <#statement#>
-//        case .RemoteControlPause:
-//            <#statement#>
-//        case .RemoteControlStop:
-//            <#statement#>
-//        case .RemoteControlTogglePlayPause:
-//            <#statement#>
-//        case .RemoteControlNextTrack:
-//            <#statement#>
-//        case .RemoteControlPreviousTrack:
-//            <#statement#>
-//        case .RemoteControlBeginSeekingBackward:
-//            <#statement#>
-//        case .RemoteControlEndSeekingBackward: 
-//            <#statement#>
-//        case .RemoteControlBeginSeekingForward: 
-//            <#statement#>
-//        case .RemoteControlEndSeekingForward: 
-//            <#statement#>
-//        }
-//    }
-
+    override func canBecomeFirstResponder() -> Bool {
+        return true
+    }
+    
+    override func remoteControlReceivedWithEvent(event: UIEvent?) {
+        guard let eventType = event?.subtype else {return}
+        switch eventType {
+        case .None:
+            break
+        case .MotionShake:
+            break
+        case .RemoteControlPlay:
+            //  继续播放
+            MusicPlayerManager.sharedInstance.goOn()
+        case .RemoteControlPause:
+            MusicPlayerManager.sharedInstance.pause()
+        case .RemoteControlStop:
+            MusicPlayerManager.sharedInstance.stop()
+        case .RemoteControlTogglePlayPause:
+            //  耳机的播放、暂停按钮
+            if MusicPlayerManager.sharedInstance.player?.rate == 0 {
+                MusicPlayerManager.sharedInstance.goOn()
+            } else {
+                MusicPlayerManager.sharedInstance.pause()
+            }
+        case .RemoteControlNextTrack:
+            break
+        case .RemoteControlPreviousTrack:
+            break
+        case .RemoteControlBeginSeekingBackward:
+            break
+        case .RemoteControlEndSeekingBackward:
+            break
+        case .RemoteControlBeginSeekingForward:
+            break
+        case .RemoteControlEndSeekingForward:
+            break
+        }
+    }
 
 }
 

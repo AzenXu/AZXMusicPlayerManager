@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B5377C761D5DBF3300B3C9F6 /* RequestTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */; };
+		B5097FA51D7D474E00D81F8C /* MusicPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5097FA21D7D474E00D81F8C /* MusicPlayerManager.swift */; };
+		B5097FA61D7D474E00D81F8C /* RequestLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5097FA31D7D474E00D81F8C /* RequestLoader.swift */; };
+		B5097FA71D7D474E00D81F8C /* RequestTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5097FA41D7D474E00D81F8C /* RequestTask.swift */; };
+		B5097FA91D7D47A700D81F8C /* Sounds.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B5097FA81D7D47A700D81F8C /* Sounds.bundle */; };
 		B5477A341D5AF5380099B2E6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A331D5AF5380099B2E6 /* AppDelegate.swift */; };
 		B5477A361D5AF5380099B2E6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A351D5AF5380099B2E6 /* ViewController.swift */; };
 		B5477A391D5AF5380099B2E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5477A371D5AF5380099B2E6 /* Main.storyboard */; };
@@ -15,8 +18,6 @@
 		B5477A3E1D5AF5380099B2E6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5477A3C1D5AF5380099B2E6 /* LaunchScreen.storyboard */; };
 		B5477A491D5AF5380099B2E6 /* testForAVPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A481D5AF5380099B2E6 /* testForAVPlayerTests.swift */; };
 		B5477A541D5AF5380099B2E6 /* testForAVPlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A531D5AF5380099B2E6 /* testForAVPlayerUITests.swift */; };
-		B5477A661D5B137B0099B2E6 /* MusicPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */; };
-		B55095AA1D5ECF3C00290EB4 /* RequestLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,8 +38,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B5097FA21D7D474E00D81F8C /* MusicPlayerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicPlayerManager.swift; sourceTree = "<group>"; };
+		B5097FA31D7D474E00D81F8C /* RequestLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestLoader.swift; sourceTree = "<group>"; };
+		B5097FA41D7D474E00D81F8C /* RequestTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTask.swift; sourceTree = "<group>"; };
+		B5097FA81D7D47A700D81F8C /* Sounds.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Sounds.bundle; sourceTree = "<group>"; };
 		B5377C721D5D7EF700B3C9F6 /* testForAVPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = testForAVPlayer.entitlements; sourceTree = "<group>"; };
-		B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTask.swift; sourceTree = "<group>"; };
 		B5477A301D5AF5380099B2E6 /* testForAVPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testForAVPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5477A331D5AF5380099B2E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5477A351D5AF5380099B2E6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -52,8 +56,6 @@
 		B5477A4F1D5AF5380099B2E6 /* testForAVPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = testForAVPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5477A531D5AF5380099B2E6 /* testForAVPlayerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testForAVPlayerUITests.swift; sourceTree = "<group>"; };
 		B5477A551D5AF5380099B2E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicPlayerManager.swift; sourceTree = "<group>"; };
-		B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +83,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B5097FA11D7D474E00D81F8C /* StreamPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				B5097FA21D7D474E00D81F8C /* MusicPlayerManager.swift */,
+				B5097FA31D7D474E00D81F8C /* RequestLoader.swift */,
+				B5097FA41D7D474E00D81F8C /* RequestTask.swift */,
+				B5097FA81D7D47A700D81F8C /* Sounds.bundle */,
+			);
+			path = StreamPlayer;
+			sourceTree = "<group>";
+		};
 		B5477A271D5AF5380099B2E6 = {
 			isa = PBXGroup;
 			children = (
@@ -107,9 +120,7 @@
 				B5377C721D5D7EF700B3C9F6 /* testForAVPlayer.entitlements */,
 				B5477A331D5AF5380099B2E6 /* AppDelegate.swift */,
 				B5477A351D5AF5380099B2E6 /* ViewController.swift */,
-				B5477A651D5B137B0099B2E6 /* MusicPlayerManager.swift */,
-				B5377C751D5DBF3300B3C9F6 /* RequestTask.swift */,
-				B55095A91D5ECF3C00290EB4 /* RequestLoader.swift */,
+				B5097FA11D7D474E00D81F8C /* StreamPlayer */,
 				B5477A371D5AF5380099B2E6 /* Main.storyboard */,
 				B5477A3A1D5AF5380099B2E6 /* Assets.xcassets */,
 				B5477A3C1D5AF5380099B2E6 /* LaunchScreen.storyboard */,
@@ -250,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5477A3E1D5AF5380099B2E6 /* LaunchScreen.storyboard in Resources */,
+				B5097FA91D7D47A700D81F8C /* Sounds.bundle in Resources */,
 				B5477A3B1D5AF5380099B2E6 /* Assets.xcassets in Resources */,
 				B5477A391D5AF5380099B2E6 /* Main.storyboard in Resources */,
 			);
@@ -276,10 +288,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5377C761D5DBF3300B3C9F6 /* RequestTask.swift in Sources */,
-				B55095AA1D5ECF3C00290EB4 /* RequestLoader.swift in Sources */,
 				B5477A361D5AF5380099B2E6 /* ViewController.swift in Sources */,
-				B5477A661D5B137B0099B2E6 /* MusicPlayerManager.swift in Sources */,
+				B5097FA51D7D474E00D81F8C /* MusicPlayerManager.swift in Sources */,
+				B5097FA61D7D474E00D81F8C /* RequestLoader.swift in Sources */,
+				B5097FA71D7D474E00D81F8C /* RequestTask.swift in Sources */,
 				B5477A341D5AF5380099B2E6 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

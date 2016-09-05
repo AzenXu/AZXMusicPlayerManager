@@ -93,7 +93,6 @@ extension RequestTask {
 // MARK: - NSURLConnectionDataDelegate
 extension RequestTask: NSURLConnectionDataDelegate {
     public func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
-        //TODO: 这里是不是还要根据range做排序呀...
         isFinishLoad = false
         guard response is NSHTTPURLResponse else {return}
         //  解析头部数据
