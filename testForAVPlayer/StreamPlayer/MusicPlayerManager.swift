@@ -470,8 +470,8 @@ extension MusicPlayerManager {
     
     private func configAudioSession() {
         do {
-            try? AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-            try? AVAudioSession.sharedInstance().setActive(true)
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+            try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("启动后台模式失败，error -- \(error)")
         }
@@ -536,6 +536,14 @@ public struct StreamAudioConfig {
 }
 
 //MARK: - 常驻后台
+/*
+ *  原理：1. 向系统申请3分钟后台权限
+ *       2. 3分钟快到期时，播放一段极短的空白音乐
+ *       3. 播放结束之后，又有了3分钟的后台权限
+ *
+ *  备注：1. 其他音乐类App在播放时，无法被我们的空白音乐打断。如果3分钟内音乐未结束，我们的App会被真正挂起
+ *       2. 其他音乐未播放时，我们的空白音乐有可能调起 - AVAudioSession进行控制
+ */
 public class BackgroundTask {
     
     private static var _counter: NSTimer?
