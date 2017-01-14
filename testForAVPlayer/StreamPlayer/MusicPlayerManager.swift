@@ -328,7 +328,7 @@ extension MusicPlayerManager {
             return url
         } else {    //  from cache
             let fileName = url.lastPathComponent
-            let path = StreamAudioConfig.audioDicPath + "/\(fileName ?? "tmp.mp4")"
+            let path = StreamAudioConfig.audioDicPath + "/\(fileName )"
             if FileManager.default.fileExists(atPath: path) {
                 let url = URL.init(fileURLWithPath: path)
                 return url
@@ -349,7 +349,7 @@ extension MusicPlayerManager {
             let asset = AVURLAsset(url: playURL)
             isLocationMusic = false
             currentAsset = asset
-            asset.resourceLoader.setDelegate(resourceLoader, queue: DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default))
+            asset.resourceLoader.setDelegate(resourceLoader, queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default))
             let item = AVPlayerItem(asset: asset)
             return item
         }
@@ -436,7 +436,7 @@ extension MusicPlayerManager {
         //  KVO监听正在播放的对象状态变化
         currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.new, context: nil)
         //  监听player播放情况
-        playerStatusObserver = player?.addPeriodicTimeObserver(forInterval: CMTimeMake(1, 1), queue: DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default), using: { [weak self] (time) in
+        playerStatusObserver = player?.addPeriodicTimeObserver(forInterval: CMTimeMake(1, 1), queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default), using: { [weak self] (time) in
             guard let `self` = self else {return}
             //  获取当前播放时间
             self.status = .play
@@ -449,7 +449,7 @@ extension MusicPlayerManager {
             if totalTime - currentTime < 0.1 {
                 dealForEnded()
             }
-            }) as? NSObject
+        }) as? NSObject
         //  监听缓存情况
         currentItem.addObserver(self, forKeyPath: "loadedTimeRanges", options: NSKeyValueObservingOptions.new, context: nil)
     }
@@ -576,7 +576,7 @@ open class BackgroundTask {
     
     fileprivate static func _startBackgroundMode(_ handler: ((_ remainingTime: TimeInterval)->())?) {
         _remainingTimeHandler = handler
-        _startWithExpirationHandler {
+        _ = _startWithExpirationHandler {
             print("App has been suspend")
         }
         _timingForRemaining()
