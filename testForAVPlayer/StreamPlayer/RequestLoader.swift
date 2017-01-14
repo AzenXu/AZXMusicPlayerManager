@@ -117,14 +117,14 @@ extension RequestLoader {
      
      返回值: 是否能完整的响应该请求 - 给播放器足够的数据
      */
-    fileprivate func _respondWithData(forRequest dataRequest: AVAssetResourceLoadingDataRequest?) -> Bool{
+    fileprivate func _respondWithData(forRequest dataRequest: AVAssetResourceLoadingDataRequest?) -> Bool {
         guard let dataRequest = dataRequest else {return true}
         guard let task = task else {return false}
         var startOffset = dataRequest.requestedOffset
         if dataRequest.currentOffset != 0 {
             startOffset = dataRequest.currentOffset
         }
-        //  如果请求的位置 + 已缓冲了的长度 比新请求的其实位置小 - 隔了一段
+        //  如果请求的位置 + 已缓冲了的长度 比新请求的起始位置小 - 隔了一段
         if task.offset + task.downLoadingOffset < Int(startOffset) {
             return false
         } else if Int(startOffset) < task.offset {   //  播放器要的起始位置，在下载器下载的起始位置之前
@@ -138,9 +138,9 @@ extension RequestLoader {
             //  应该能拿到的字节数
             let numberOfBytesToRespondWith = min(dataRequest.requestedLength, unreadBytes)
             //  应该从本地拿的数据范围
-            let fetchRange = NSMakeRange(Int(startOffset) - task.offset, numberOfBytesToRespondWith)
+            guard let fetchRange = NSRange(location: Int(startOffset) - task.offset, length: numberOfBytesToRespondWith).toRange() else { return false }
             //  拿到响应数据
-            guard let responseData = fileData?.subdata(in: fetchRange) else {return false}
+            guard let responseData = fileData?.subdata(in: fetchRange) else { return false }
             //  响应请求
             dataRequest.respond(with: responseData)
             //  请求结束位置

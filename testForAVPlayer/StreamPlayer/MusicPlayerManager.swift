@@ -229,8 +229,8 @@ extension MusicPlayerManager {
             if !component.contains("temp.mp4") {
                 let fullPath = StreamAudioConfig.audioDicPath + "/" + component
                 if fileManager.fileExists(atPath: fullPath) {
-                    guard let fileAttributeDic = try? fileManager.attributesOfItem(atPath: fullPath) else {break}
-                    let fileSize = fileAttributeDic["NSFileSize"] as? Float ?? 0
+                    guard let fileAttributeDic = try? fileManager.attributesOfItem(atPath: fullPath) else { break }
+                    let fileSize = fileAttributeDic[.size] as? Float ?? 0
                     size += (fileSize/1024.0)
                 }
             }
