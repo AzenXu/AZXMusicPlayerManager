@@ -10,34 +10,34 @@
 import AVFoundation
 import MediaPlayer
 
-public class MusicPlayerManager: NSObject {
+open class MusicPlayerManager: NSObject {
     
     
     //  public var status
     
-    public var currentURL: NSURL? {
+    open var currentURL: URL? {
         get {
-            guard let currentIndex = currentIndex, musicURLList = musicURLList where currentIndex < musicURLList.count else {return nil}
+            guard let currentIndex = currentIndex, let musicURLList = musicURLList, currentIndex < musicURLList.count else {return nil}
             return musicURLList[currentIndex]
         }
     }
     
     /**用于解决swift中enum无法被监听的问题*/
-    dynamic public var statusRaw: Int = 0
+    dynamic open var statusRaw: Int = 0
     
     /**播放状态，用于需要获取播放器状态的地方KVO*/
-    public var status: ManagerStatus = .Non {
+    open var status: ManagerStatus = .non {
         didSet {
             if oldValue != status {
                 guard let stateChangeHandlerArray = self.stateChangeHandlerArray else {return}
                 for callBack in stateChangeHandlerArray {
-                    callBack?(state: status)
+                    callBack?(status)
                 }
             }
         }
     }
     /**播放进度*/
-    public var progress: CGFloat {
+    open var progress: CGFloat {
         get {
             if playDuration > 0 {
                 let progress = playTime / playDuration
@@ -48,9 +48,9 @@ public class MusicPlayerManager: NSObject {
         }
     }
     /**已播放时长*/
-    public var playTime: CGFloat = 0
+    open var playTime: CGFloat = 0
     /**总时长*/
-    public var playDuration: CGFloat = CGFloat.max {
+    open var playDuration: CGFloat = CGFloat.greatestFiniteMagnitude {
         didSet {
             if playDuration != oldValue {
                 configNowPlayingCenter()
@@ -58,21 +58,21 @@ public class MusicPlayerManager: NSObject {
         }
     }
     /**缓冲时长*/
-    public var tmpTime: CGFloat = 0
+    open var tmpTime: CGFloat = 0
     
-    public var playEndConsul: (()->())?
+    open var playEndConsul: (()->())?
     /**强引用控制器，防止被销毁*/
-    public var currentController: UIViewController?
+    open var currentController: UIViewController?
     /**标识当前控制器的编号，防止控制器重复加载*/
-    public var currentIdentify: String?
+    open var currentIdentify: String?
     /**防止多处为handler赋值导致覆盖*/
-    private var stateChangeHandlerArray: [((state: ManagerStatus)->())?]?
+    fileprivate var stateChangeHandlerArray: [((_ state: ManagerStatus)->())?]?
     
     
     //  private status
-    private var currentIndex: Int?
-    private var playerModel: PlayModel = .Normal
-    private var currentItem: AVPlayerItem? {
+    fileprivate var currentIndex: Int?
+    fileprivate var playerModel: PlayModel = .normal
+    fileprivate var currentItem: AVPlayerItem? {
         get {
             if let currentURL = currentURL {
                 let item = getPlayerItem(withURL: currentURL)
@@ -83,19 +83,19 @@ public class MusicPlayerManager: NSObject {
         }
     }
     
-    private var isLocationMusic: Bool = false
-    private var musicURLList: [NSURL]?
-    private var musicInfo: MusicBasicInfo?
+    fileprivate var isLocationMusic: Bool = false
+    fileprivate var musicURLList: [URL]?
+    fileprivate var musicInfo: MusicBasicInfo?
     
     //  basic element
-    public var player: AVPlayer?
+    open var player: AVPlayer?
     
-    private var playerStatusObserver: NSObject?
-    private var resourceLoader: RequestLoader = RequestLoader()
-    private var currentAsset: AVURLAsset?
-    private var progressCallBack: ((tmpProgress: Float?, playProgress: Float?)->())?
+    fileprivate var playerStatusObserver: NSObject?
+    fileprivate var resourceLoader: RequestLoader = RequestLoader()
+    fileprivate var currentAsset: AVURLAsset?
+    fileprivate var progressCallBack: ((_ tmpProgress: Float?, _ playProgress: Float?)->())?
     
-    public class var sharedInstance: MusicPlayerManager {
+    open class var sharedInstance: MusicPlayerManager {
         struct Singleton {
             static let instance = MusicPlayerManager()
         }
@@ -103,7 +103,7 @@ public class MusicPlayerManager: NSObject {
     }
     
     public enum ManagerStatus: Int {
-        case Non, LoadSongInfo, ReadyToPlay, Play, Pause, Stop
+        case non, loadSongInfo, readyToPlay, play, pause, stop
     }
     
     /**
@@ -113,7 +113,7 @@ public class MusicPlayerManager: NSObject {
      - RepeatSingle: 单曲循环
      */
     public enum PlayModel {
-        case Normal, RepeatSingle
+        case normal, repeatSingle
     }
     
     /**
@@ -137,7 +137,7 @@ extension MusicPlayerManager {
     /**
      开始播放
      */
-    public func play(musicURL: NSURL?) {
+    public func play(_ musicURL: URL?) {
         guard let musicURL = musicURL else {return}
         if let index = getIndexOfMusic(music: musicURL) {   //   歌曲在队列中，则按顺序播放
             currentIndex = index
@@ -151,7 +151,7 @@ extension MusicPlayerManager {
         configBreakObserver()
     }
     
-    public func play(musicURL: NSURL?, callBack: ((tmpProgress: Float?, playProgress: Float?)->())?) {
+    public func play(_ musicURL: URL?, callBack: ((_ tmpProgress: Float?, _ playProgress: Float?)->())?) {
         play(musicURL)
         progressCallBack = callBack
     }
@@ -189,15 +189,15 @@ extension MusicPlayerManager {
     }
     
     public func rebroadcast() {
-        if status == .Play {
-            player?.seekToTime(kCMTimeZero)
+        if status == .play {
+            player?.seek(to: kCMTimeZero)
         }
     }
     
     /**
      配置歌曲信息，以控制Now Playing Center显示
      */
-    public func configMusicInfo(musicTitle: String, artist: String, coverImage: UIImage?) {
+    public func configMusicInfo(_ musicTitle: String, artist: String, coverImage: UIImage?) {
         var realImage = UIImage(named: "AppIcon")
         if coverImage != nil {realImage = coverImage!}
         musicInfo = MusicBasicInfo(title: musicTitle, artist: artist, coverImage: realImage!)
@@ -208,7 +208,7 @@ extension MusicPlayerManager {
     /**
      设置歌曲状态改变时的回调
      */
-    public func setStateChangeCallBack(callBack: (state: ManagerStatus)->()) {
+    public func setStateChangeCallBack(_ callBack: @escaping (_ state: ManagerStatus)->()) {
         if stateChangeHandlerArray != nil {
             stateChangeHandlerArray?.append(callBack)
         } else {
@@ -222,14 +222,14 @@ extension MusicPlayerManager {
      - returns: 返回值大小单位：KB
      */
     public func getMusicDirSize() -> Float {
-        let fileManager = NSFileManager.defaultManager()
+        let fileManager = FileManager.default
         var size: Float = 0
-        guard let fileArray = try? fileManager.contentsOfDirectoryAtPath(StreamAudioConfig.audioDicPath) else {return 0}
+        guard let fileArray = try? fileManager.contentsOfDirectory(atPath: StreamAudioConfig.audioDicPath) else {return 0}
         for component in fileArray {
-            if !component.containsString("temp.mp4") {
+            if !component.contains("temp.mp4") {
                 let fullPath = StreamAudioConfig.audioDicPath + "/" + component
-                if fileManager.fileExistsAtPath(fullPath) {
-                    guard let fileAttributeDic = try? fileManager.attributesOfItemAtPath(fullPath) else {break}
+                if fileManager.fileExists(atPath: fullPath) {
+                    guard let fileAttributeDic = try? fileManager.attributesOfItem(atPath: fullPath) else {break}
                     let fileSize = fileAttributeDic["NSFileSize"] as? Float ?? 0
                     size += (fileSize/1024.0)
                 }
@@ -241,13 +241,13 @@ extension MusicPlayerManager {
      清空歌曲缓存文件夹
      */
     public func clearMusicDir() {
-        let fileManager = NSFileManager.defaultManager()
-        guard let fileArray = try? fileManager.contentsOfDirectoryAtPath(StreamAudioConfig.audioDicPath) else {return}
+        let fileManager = FileManager.default
+        guard let fileArray = try? fileManager.contentsOfDirectory(atPath: StreamAudioConfig.audioDicPath) else {return}
         for component in fileArray {
-            if !component.containsString("temp.mp4") {
+            if !component.contains("temp.mp4") {
                 let fullPath = StreamAudioConfig.audioDicPath + "/" + component
-                if fileManager.fileExistsAtPath(fullPath) {
-                    do { try fileManager.removeItemAtPath(fullPath) } catch {print("music data remove failure -- path -- \(fullPath)")}
+                if fileManager.fileExists(atPath: fullPath) {
+                    do { try fileManager.removeItem(atPath: fullPath) } catch {print("music data remove failure -- path -- \(fullPath)")}
                 }
             }
         }
@@ -257,22 +257,22 @@ extension MusicPlayerManager {
 // MARK: - private funcs
 extension MusicPlayerManager {
     
-    private func putMusicToArray(music URL: NSURL) {
+    fileprivate func putMusicToArray(music URL: Foundation.URL) {
         if musicURLList == nil {
             musicURLList = [URL]
         } else {
-            musicURLList!.insert(URL, atIndex: 0)
+            musicURLList!.insert(URL, at: 0)
         }
     }
     
-    private func getIndexOfMusic(music URL: NSURL) -> Int? {
-        let index = musicURLList?.indexOf(URL)
+    fileprivate func getIndexOfMusic(music URL: Foundation.URL) -> Int? {
+        let index = musicURLList?.index(of: URL)
         return index
     }
     
-    private func getNextIndex() -> Int? {
-        if let musicURLList = musicURLList where musicURLList.count > 0 {
-            if let currentIndex = currentIndex where currentIndex + 1 < musicURLList.count {
+    fileprivate func getNextIndex() -> Int? {
+        if let musicURLList = musicURLList, musicURLList.count > 0 {
+            if let currentIndex = currentIndex, currentIndex + 1 < musicURLList.count {
                 return currentIndex + 1
             } else {
                 return 0
@@ -282,7 +282,7 @@ extension MusicPlayerManager {
         }
     }
     
-    private func getPreviousIndex() -> Int? {
+    fileprivate func getPreviousIndex() -> Int? {
         if let currentIndex = currentIndex {
             if currentIndex - 1 >= 0 {
                 return currentIndex - 1
@@ -297,15 +297,15 @@ extension MusicPlayerManager {
     /**
      从头播放音乐列表
      */
-    private func replayMusicList() {
-        guard let musicURLList = musicURLList where musicURLList.count > 0 else {return}
+    fileprivate func replayMusicList() {
+        guard let musicURLList = musicURLList, musicURLList.count > 0 else {return}
         currentIndex = 0
         playMusicWithCurrentIndex()
     }
     /**
      播放当前音乐
      */
-    private func playMusicWithCurrentIndex() {
+    fileprivate func playMusicWithCurrentIndex() {
         guard let currentURL = currentURL else {return}
         //  结束上一首
         endPlay()
@@ -315,9 +315,9 @@ extension MusicPlayerManager {
     /**
      本地不存在，返回nil，否则返回本地URL
      */
-    private func getLocationFilePath(url: NSURL) -> NSURL? {
-        func fromBundle(url: NSURL) -> Bool {
-            if url.absoluteString.containsString("file://") {
+    fileprivate func getLocationFilePath(_ url: URL) -> URL? {
+        func fromBundle(_ url: URL) -> Bool {
+            if url.absoluteString.contains("file://") {
                 return true
             } else {
                 return false
@@ -329,8 +329,8 @@ extension MusicPlayerManager {
         } else {    //  from cache
             let fileName = url.lastPathComponent
             let path = StreamAudioConfig.audioDicPath + "/\(fileName ?? "tmp.mp4")"
-            if NSFileManager.defaultManager().fileExistsAtPath(path) {
-                let url = NSURL.init(fileURLWithPath: path)
+            if FileManager.default.fileExists(atPath: path) {
+                let url = URL.init(fileURLWithPath: path)
                 return url
             } else {
                 return nil
@@ -338,37 +338,37 @@ extension MusicPlayerManager {
         }
     }
     
-    private func getPlayerItem(withURL musicURL: NSURL) -> AVPlayerItem {
+    fileprivate func getPlayerItem(withURL musicURL: URL) -> AVPlayerItem {
         
         if let locationFile = getLocationFilePath(musicURL) {
-            let item = AVPlayerItem(URL: locationFile)
+            let item = AVPlayerItem(url: locationFile)
             isLocationMusic = true
             return item
         } else {
             let playURL = resourceLoader.getURL(url: musicURL)!  //  转换协议头
-            let asset = AVURLAsset(URL: playURL)
+            let asset = AVURLAsset(url: playURL)
             isLocationMusic = false
             currentAsset = asset
-            asset.resourceLoader.setDelegate(resourceLoader, queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+            asset.resourceLoader.setDelegate(resourceLoader, queue: DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default))
             let item = AVPlayerItem(asset: asset)
             return item
         }
     }
     
-    private func setupPlayer(withURL musicURL: NSURL) {
+    fileprivate func setupPlayer(withURL musicURL: URL) {
         let songItem = getPlayerItem(withURL: musicURL)
         player = AVPlayer(playerItem: songItem)
     }
     
-    private func playerPlay() {
+    fileprivate func playerPlay() {
         player?.play()
     }
     
-    private func endPlay() {
-        status = ManagerStatus.Stop
+    fileprivate func endPlay() {
+        status = ManagerStatus.stop
         player?.rate = 0
         removeObserForPlayingItem()
-        player?.replaceCurrentItemWithPlayerItem(nil)
+        player?.replaceCurrentItem(with: nil)
         resourceLoader.cancel()
         currentAsset?.resourceLoader.setDelegate(nil, queue: nil)
         
@@ -383,78 +383,78 @@ extension MusicPlayerManager {
         currentIdentify = nil
     }
     
-    private func configNowPlayingCenter() {
+    fileprivate func configNowPlayingCenter() {
         var info = [String:NSObject]()
         if let musicInfo = musicInfo {
-            info.updateValue(musicInfo.title, forKey: MPMediaItemPropertyTitle)
-            info.updateValue(musicInfo.artist, forKey: MPMediaItemPropertyArtist)
+            info.updateValue(musicInfo.title as NSObject, forKey: MPMediaItemPropertyTitle)
+            info.updateValue(musicInfo.artist as NSObject, forKey: MPMediaItemPropertyArtist)
             let artwork = MPMediaItemArtwork(image: musicInfo.coverImage)   //  设置图片
             info.updateValue(artwork, forKey: MPMediaItemPropertyArtwork)                   //  锁屏界面
         }
-        info.updateValue("\(playTime)", forKey: MPNowPlayingInfoPropertyElapsedPlaybackTime)   //   当前播放时长
-        info.updateValue("\(player?.rate ?? 0)", forKey: MPNowPlayingInfoPropertyPlaybackRate)            //   播放速度
-        info.updateValue("\(playDuration)", forKey: MPMediaItemPropertyPlaybackDuration)          //   总时长
-        MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = info
+        info.updateValue("\(playTime)" as NSObject, forKey: MPNowPlayingInfoPropertyElapsedPlaybackTime)   //   当前播放时长
+        info.updateValue("\(player?.rate ?? 0)" as NSObject, forKey: MPNowPlayingInfoPropertyPlaybackRate)            //   播放速度
+        info.updateValue("\(playDuration)" as NSObject, forKey: MPMediaItemPropertyPlaybackDuration)          //   总时长
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 }
 
 // MARK: - observer for player status
 extension MusicPlayerManager {
     
-    public override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard object is AVPlayerItem else {return}
         let item = object as! AVPlayerItem
         if keyPath == "status" {
-            if item.status == AVPlayerItemStatus.ReadyToPlay {
-                status = .ReadyToPlay
+            if item.status == AVPlayerItemStatus.readyToPlay {
+                status = .readyToPlay
                 playerPlay()
-            } else if item.status == AVPlayerItemStatus.Failed {
+            } else if item.status == AVPlayerItemStatus.failed {
                 stop()
             }
         } else if keyPath == "loadedTimeRanges" {
             let array = item.loadedTimeRanges
-            guard let timeRange = array.first?.CMTimeRangeValue else {return}  //  缓冲时间范围
+            guard let timeRange = array.first?.timeRangeValue else {return}  //  缓冲时间范围
             let totalBuffer = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)    //  当前缓冲长度
             tmpTime = CGFloat(totalBuffer)
             let tmpProgress = tmpTime / playDuration
-            progressCallBack?(tmpProgress: Float(tmpProgress), playProgress: nil)
+            progressCallBack?(Float(tmpProgress), nil)
         }
     }
     
-    private func observePlayingItem() {
+    fileprivate func observePlayingItem() {
         
         func dealForEnded() {
             switch playerModel {
-            case .Normal:
+            case .normal:
                 endPlay()
-            case .RepeatSingle:
+            case .repeatSingle:
                 rebroadcast()
             }
         }
         
         guard let currentItem = self.player?.currentItem else {return}
         //  KVO监听正在播放的对象状态变化
-        currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.New, context: nil)
+        currentItem.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.new, context: nil)
         //  监听player播放情况
-        playerStatusObserver = player?.addPeriodicTimeObserverForInterval(CMTimeMake(1, 1), queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), usingBlock: { [weak self] (time) in
+        playerStatusObserver = player?.addPeriodicTimeObserver(forInterval: CMTimeMake(1, 1), queue: DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default), using: { [weak self] (time) in
             guard let `self` = self else {return}
             //  获取当前播放时间
-            self.status = .Play
+            self.status = .play
             let currentTime = CMTimeGetSeconds(time)
             let totalTime = CMTimeGetSeconds(currentItem.duration)
             self.playDuration = CGFloat(totalTime)
             self.playTime = CGFloat(currentTime)
             let tmpProgress: Float? = self.isLocationMusic ? 1 : nil    //  本地播放，则返回tmp进度
-            self.progressCallBack?(tmpProgress: tmpProgress, playProgress: Float(self.progress))
+            self.progressCallBack?(tmpProgress, Float(self.progress))
             if totalTime - currentTime < 0.1 {
                 dealForEnded()
             }
             }) as? NSObject
         //  监听缓存情况
-        currentItem.addObserver(self, forKeyPath: "loadedTimeRanges", options: NSKeyValueObservingOptions.New, context: nil)
+        currentItem.addObserver(self, forKeyPath: "loadedTimeRanges", options: NSKeyValueObservingOptions.new, context: nil)
     }
     
-    private func removeObserForPlayingItem() {
+    fileprivate func removeObserForPlayingItem() {
         guard let currentItem = self.player?.currentItem else {return}
         currentItem.removeObserver(self, forKeyPath: "status")
         if playerStatusObserver != nil {
@@ -468,7 +468,7 @@ extension MusicPlayerManager {
 // MARK: - for AVAudioSession
 extension MusicPlayerManager {
     
-    private func configAudioSession() {
+    fileprivate func configAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
             try AVAudioSession.sharedInstance().setActive(true)
@@ -478,59 +478,59 @@ extension MusicPlayerManager {
     }
     
     //  监听打断
-    private func configBreakObserver() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(handleInterruption), name: AVAudioSessionInterruptionNotification, object: AVAudioSession.sharedInstance())
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(handleRouteChange), name: AVAudioSessionRouteChangeNotification, object: AVAudioSession.sharedInstance())
+    fileprivate func configBreakObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleInterruption), name: NSNotification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
+        NotificationCenter.default.addObserver(self, selector: #selector(handleRouteChange), name: NSNotification.Name.AVAudioSessionRouteChange, object: AVAudioSession.sharedInstance())
     }
     
     //  来电打断
-    @objc private func handleInterruption(noti: NSNotification) {
-        guard noti.name == AVAudioSessionInterruptionNotification else { return }
-        guard let info = noti.userInfo, typenumber = info[AVAudioSessionInterruptionTypeKey]?.unsignedIntegerValue, type = AVAudioSessionInterruptionType(rawValue: typenumber) else { return }
+    @objc fileprivate func handleInterruption(_ noti: Notification) {
+        guard noti.name == NSNotification.Name.AVAudioSessionInterruption else { return }
+        guard let info = noti.userInfo, let typenumber = (info[AVAudioSessionInterruptionTypeKey] as AnyObject).uintValue, let type = AVAudioSessionInterruptionType(rawValue: typenumber) else { return }
         switch type {
-        case .Began:
+        case .began:
             pause()
-        case .Ended:
+        case .ended:
             goOn()
         }
     }
     
     //拔出耳机等设备变更操作
-    @objc private func handleRouteChange(noti: NSNotification) {
+    @objc fileprivate func handleRouteChange(_ noti: Notification) {
         
-        func analysisInputAndOutputPorts(noti: NSNotification) {
-            guard let info = noti.userInfo, previousRoute = info[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else { return }
+        func analysisInputAndOutputPorts(_ noti: Notification) {
+            guard let info = noti.userInfo, let previousRoute = info[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else { return }
             let inputs = previousRoute.inputs
             let outputs = previousRoute.outputs
             print(inputs)
             print(outputs)
         }
         
-        guard noti.name == AVAudioSessionRouteChangeNotification else { return }
-        guard let info = noti.userInfo, typenumber = info[AVAudioSessionRouteChangeReasonKey]?.unsignedIntegerValue, type = AVAudioSessionRouteChangeReason(rawValue: typenumber) else { return }
+        guard noti.name == NSNotification.Name.AVAudioSessionRouteChange else { return }
+        guard let info = noti.userInfo, let typenumber = (info[AVAudioSessionRouteChangeReasonKey] as AnyObject).uintValue, let type = AVAudioSessionRouteChangeReason(rawValue: typenumber) else { return }
         switch type {
-        case .Unknown:
+        case .unknown:
             break
-        case .NewDeviceAvailable:
+        case .newDeviceAvailable:
             break
-        case .OldDeviceUnavailable:
+        case .oldDeviceUnavailable:
             break
-        case .CategoryChange:
+        case .categoryChange:
             break
-        case .Override:
+        case .override:
             break
-        case .WakeFromSleep:
+        case .wakeFromSleep:
             break
-        case .NoSuitableRouteForCategory:
+        case .noSuitableRouteForCategory:
             break
-        case .RouteConfigurationChange:
+        case .routeConfigurationChange:
             break
         }
     }
 }
 
 public struct StreamAudioConfig {
-    static let audioDicPath: String = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).last! + "/streamAudio"  //  缓冲文件夹
+    static let audioDicPath: String = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true).last! + "/streamAudio"  //  缓冲文件夹
     static let tempPath: String = audioDicPath + "/temp.mp4"    //  缓冲文件路径 - 非持久化文件路径 - 当前逻辑下，有且只有一个缓冲文件
     
 }
@@ -544,22 +544,22 @@ public struct StreamAudioConfig {
  *  备注：1. 其他音乐类App在播放时，无法被我们的空白音乐打断。如果3分钟内音乐未结束，我们的App会被真正挂起
  *       2. 其他音乐未播放时，我们的空白音乐有可能调起 - AVAudioSession进行控制
  */
-public class BackgroundTask {
+open class BackgroundTask {
     
-    private static var _counter: NSTimer?
+    fileprivate static var _counter: Timer?
     
-    private static var _taskId: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+    fileprivate static var _taskId: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     
-    private static var _remainingTimeHandler: ((remainingTime: NSTimeInterval)->())?
+    fileprivate static var _remainingTimeHandler: ((_ remainingTime: TimeInterval)->())?
     
-    private static let _remainTimeRange = (min:Double(170), max:Double(171))
+    fileprivate static let _remainTimeRange = (min:Double(170), max:Double(171))
     
-    private static let _remainTimeMax = Double(180)
+    fileprivate static let _remainTimeMax = Double(180)
     
     /**
      需要在 - func applicationDidEnterBackground(application: UIApplication) 方法中调用
      */
-    public static func fire() {
+    open static func fire() {
         _startBackgroundMode { (remainingTime) in
             print(remainingTime)
             if remainingTime > _remainTimeMax {
@@ -569,12 +569,12 @@ public class BackgroundTask {
             }
         }
         
-        NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationWillEnterForegroundNotification, object: nil, queue: NSOperationQueue.mainQueue()) { (noty) in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationWillEnterForeground, object: nil, queue: OperationQueue.main) { (noty) in
             _removeTimer()
         }
     }
     
-    private static func _startBackgroundMode(handler: ((remainingTime: NSTimeInterval)->())?) {
+    fileprivate static func _startBackgroundMode(_ handler: ((_ remainingTime: TimeInterval)->())?) {
         _remainingTimeHandler = handler
         _startWithExpirationHandler {
             print("App has been suspend")
@@ -582,44 +582,44 @@ public class BackgroundTask {
         _timingForRemaining()
     }
     
-    private static func _timingForRemaining() {
+    fileprivate static func _timingForRemaining() {
         _removeTimer()
-        _counter = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(_dealWithRestBackgroundTime), userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(_counter!, forMode: NSDefaultRunLoopMode)
+        _counter = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(_dealWithRestBackgroundTime), userInfo: nil, repeats: true)
+        RunLoop.current.add(_counter!, forMode: RunLoopMode.defaultRunLoopMode)
         _counter?.fire()
     }
     
-    dynamic private static func _dealWithRestBackgroundTime() {
-        let remainingTime = UIApplication.sharedApplication().backgroundTimeRemaining
-        _remainingTimeHandler?(remainingTime: remainingTime)
+    dynamic fileprivate static func _dealWithRestBackgroundTime() {
+        let remainingTime = UIApplication.shared.backgroundTimeRemaining
+        _remainingTimeHandler?(remainingTime)
     }
     
-    private static func _startWithExpirationHandler(handler: (() -> Void)?) -> Bool {
-        _taskId = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler {
+    fileprivate static func _startWithExpirationHandler(_ handler: (() -> Void)?) -> Bool {
+        _taskId = UIApplication.shared.beginBackgroundTask (expirationHandler: {
             if let safeHandler = handler { safeHandler() }
             _endBackgroundTask()
-        }
+        })
         return  (_taskId != UIBackgroundTaskInvalid)
     }
     
-    private static func _endBackgroundTask() {
+    fileprivate static func _endBackgroundTask() {
         if (_taskId != UIBackgroundTaskInvalid) {
             let id = _taskId
             _taskId = UIBackgroundTaskInvalid
             _removeTimer()
-            UIApplication.sharedApplication().endBackgroundTask(id)
+            UIApplication.shared.endBackgroundTask(id)
         }
     }
     
-    private static func _playBlankMusic() {
-        let bundlePath = NSBundle.mainBundle().pathForResource("Sounds", ofType: "bundle") ?? ""
-        let bundle = NSBundle(path: bundlePath)
-        let path = bundle?.pathForResource("blankMusic", ofType: "mp3")
-        let url = NSURL.fileURLWithPath(path ?? "")
+    fileprivate static func _playBlankMusic() {
+        let bundlePath = Bundle.main.path(forResource: "Sounds", ofType: "bundle") ?? ""
+        let bundle = Bundle(path: bundlePath)
+        let path = bundle?.path(forResource: "blankMusic", ofType: "mp3")
+        let url = URL(fileURLWithPath: path ?? "")
         MusicPlayerManager.sharedInstance.play(url)
     }
     
-    private static func _removeTimer() {
+    fileprivate static func _removeTimer() {
         _counter?.invalidate()
         _counter = nil
     }

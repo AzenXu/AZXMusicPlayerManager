@@ -18,37 +18,37 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let musicURL = NSURL.init(string: "http://m2.music.126.net/feplW2VPVs9Y8lE_I08BQQ==/1386484166585821.mp3")!
+        let musicURL = URL.init(string: "http://m2.music.126.net/feplW2VPVs9Y8lE_I08BQQ==/1386484166585821.mp3")!
         MusicPlayerManager.sharedInstance.play(musicURL)
     }
     
-    @IBAction func startPlay(sender: AnyObject) {
+    @IBAction func startPlay(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.play(MusicPlayerManager.sharedInstance.currentURL)
     }
     
-    @IBAction func stop(sender: AnyObject) {
+    @IBAction func stop(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.stop()
     }
     
-    @IBAction func pasue(sender: AnyObject) {
+    @IBAction func pasue(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.pause()
     }
     
-    @IBAction func goOn(sender: AnyObject) {
+    @IBAction func goOn(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.goOn()
     }
     
-    @IBAction func nextSong(sender: AnyObject) {
+    @IBAction func nextSong(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.next()
     }
-    @IBAction func lastSong(sender: AnyObject) {
+    @IBAction func lastSong(_ sender: AnyObject) {
         MusicPlayerManager.sharedInstance.previous()
     }
     
-    @IBAction func choiceSong(sender: UIButton) {
+    @IBAction func choiceSong(_ sender: UIButton) {
         guard sender.tag < urlStrings.count else {return}
         let urlString = urlStrings[sender.tag]
-        let url = NSURL(string: urlString)
+        let url = URL(string: urlString)
         MusicPlayerManager.sharedInstance.play(url)
     }
 }

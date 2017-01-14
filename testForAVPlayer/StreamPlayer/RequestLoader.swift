@@ -10,14 +10,14 @@ import Foundation
 import AVFoundation
 import MobileCoreServices
 
-public class RequestLoader: NSObject {
+open class RequestLoader: NSObject {
     
     //  publics
-    public var task: RequestTask?   //  下载任务
-    public var finishLoadingHandler: ((task: RequestTask, errorCode: Int?)->())?    //  下载结果回调
+    open var task: RequestTask?   //  下载任务
+    open var finishLoadingHandler: ((_ task: RequestTask, _ errorCode: Int?)->())?    //  下载结果回调
     
     //  privates
-    private var pendingRequset = [AVAssetResourceLoadingRequest]()   //  存播放器请求的数据的
+    fileprivate var pendingRequset = [AVAssetResourceLoadingRequest]()   //  存播放器请求的数据的
 }
 
 extension RequestLoader: AVAssetResourceLoaderDelegate {
@@ -30,7 +30,7 @@ extension RequestLoader: AVAssetResourceLoaderDelegate {
      
      - returns: <#return value description#>
      */
-    public func resourceLoader(resourceLoader: AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest) -> Bool {
+    public func resourceLoader(_ resourceLoader: AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest) -> Bool {
         //  添加请求到队列
         pendingRequset.append(loadingRequest)
         //  处理请求
@@ -46,15 +46,15 @@ extension RequestLoader: AVAssetResourceLoaderDelegate {
      - parameter resourceLoader: 资源管理器
      - parameter loadingRequest: 待关请求
      */
-    public func resourceLoader(resourceLoader: AVAssetResourceLoader, didCancelLoadingRequest loadingRequest: AVAssetResourceLoadingRequest) {
-        guard let index = pendingRequset.indexOf(loadingRequest) else {return}
-        pendingRequset.removeAtIndex(index)
+    public func resourceLoader(_ resourceLoader: AVAssetResourceLoader, didCancel loadingRequest: AVAssetResourceLoadingRequest) {
+        guard let index = pendingRequset.index(of: loadingRequest) else {return}
+        pendingRequset.remove(at: index)
     }
 }
 
 extension RequestLoader {
-    private func _dealWithLoadingRequest(loadingRequest: AVAssetResourceLoadingRequest) {
-        guard let interceptedURL = loadingRequest.request.URL else {return}
+    fileprivate func _dealWithLoadingRequest(_ loadingRequest: AVAssetResourceLoadingRequest) {
+        guard let interceptedURL = loadingRequest.request.url else {return}
         let range = NSMakeRange(Int(loadingRequest.dataRequest?.currentOffset ?? 0),Int.max)
         if let task = task {
             if task.downLoadingOffset > 0 { //  如果该请求正在加载...
@@ -72,10 +72,10 @@ extension RequestLoader {
                 self._processPendingRequests()
             }
             task?.receiveVideoFinishHanlder = { task in
-                self.finishLoadingHandler?(task: task, errorCode: nil)
+                self.finishLoadingHandler?(task, nil)
             }
             task?.receiveVideoFailHandler = { task, error in
-                self.finishLoadingHandler?(task: task, errorCode: error.code)
+                self.finishLoadingHandler?(task, error.code)
             }
             task?.set(URL: interceptedURL, offset: 0)
         }
@@ -83,7 +83,7 @@ extension RequestLoader {
     /**
      处理加载中的请求
      */
-    private func _processPendingRequests() {
+    fileprivate func _processPendingRequests() {
         var requestsCompleted = [AVAssetResourceLoadingRequest]()
         for loadingRequest in pendingRequset {
             _fillInContentInfomation(loadingRequest.contentInformationRequest)
@@ -103,11 +103,11 @@ extension RequestLoader {
     /**
      设置请求信息
      */
-    private func _fillInContentInfomation(contentInfomationRequst: AVAssetResourceLoadingContentInformationRequest?) {
+    fileprivate func _fillInContentInfomation(_ contentInfomationRequst: AVAssetResourceLoadingContentInformationRequest?) {
         guard let task = task else {return}
         let mimeType = task.mimeType
-        let contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType!, nil)?.takeRetainedValue()
-        contentInfomationRequst?.byteRangeAccessSupported = true
+        let contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType! as CFString, nil)?.takeRetainedValue()
+        contentInfomationRequst?.isByteRangeAccessSupported = true
         contentInfomationRequst?.contentType = CFBridgingRetain(contentType) as? String
         contentInfomationRequst?.contentLength = Int64(task.videoLength)
     }
@@ -117,7 +117,7 @@ extension RequestLoader {
      
      返回值: 是否能完整的响应该请求 - 给播放器足够的数据
      */
-    private func _respondWithData(forRequest dataRequest: AVAssetResourceLoadingDataRequest?) -> Bool{
+    fileprivate func _respondWithData(forRequest dataRequest: AVAssetResourceLoadingDataRequest?) -> Bool{
         guard let dataRequest = dataRequest else {return true}
         guard let task = task else {return false}
         var startOffset = dataRequest.requestedOffset
@@ -131,8 +131,8 @@ extension RequestLoader {
             return false
         } else {
             //  取出来缓存文件
-            var fileData: NSData? = nil
-            fileData = NSData(contentsOfFile: StreamAudioConfig.tempPath)
+            var fileData: Data? = nil
+            fileData = try? Data(contentsOf: URL(fileURLWithPath: StreamAudioConfig.tempPath))
             //  可以拿到的从startOffset之后的长度
             let unreadBytes = task.downLoadingOffset - (Int(startOffset) - task.offset)
             //  应该能拿到的字节数
@@ -140,9 +140,9 @@ extension RequestLoader {
             //  应该从本地拿的数据范围
             let fetchRange = NSMakeRange(Int(startOffset) - task.offset, numberOfBytesToRespondWith)
             //  拿到响应数据
-            guard let responseData = fileData?.subdataWithRange(fetchRange) else {return false}
+            guard let responseData = fileData?.subdata(in: fetchRange) else {return false}
             //  响应请求
-            dataRequest.respondWithData(responseData)
+            dataRequest.respond(with: responseData)
             //  请求结束位置
             let endOffset = startOffset + dataRequest.requestedLength
             //  是否获取到完整数据
@@ -160,11 +160,11 @@ extension RequestLoader {
      - parameter scheme: 协议头（默认为streaming）
      - parameter url:    待转换URL
      */
-    public func getURL(forScheme scheme: String = "streaming", url: NSURL?) -> NSURL? {
+    public func getURL(forScheme scheme: String = "streaming", url: URL?) -> URL? {
         guard let url = url else {return nil}
-        let component = NSURLComponents(URL: url, resolvingAgainstBaseURL: false)
+        var component = URLComponents(url: url, resolvingAgainstBaseURL: false)
         component?.scheme = scheme
-        return component?.URL
+        return component?.url
     }
     
     public func cancel() {
